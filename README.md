@@ -9,5 +9,5 @@ ___
 `npm run start` — запускает сервер   
 `npm run dev` — запускает сервер с hot-reload
 ___
-##Ссылки
+## Ссылки
 ###### API сервиса - https://api.movies-nest.students.nomoredomains.club
