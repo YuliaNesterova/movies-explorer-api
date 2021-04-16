@@ -28,8 +28,6 @@ const app = express();
 
 app.use(helmet());
 
-app.use(limiter);
-
 app.use('*', cors(options));
 
 const { PORT = 3000 } = process.env;
@@ -44,6 +42,8 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
 });
 
 app.use(requestLogger);
+
+app.use(limiter);
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -67,8 +67,6 @@ app.use('/', errorRouter);
 
 app.use(errorLogger);
 
-app.use(errors());
-
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
@@ -81,5 +79,7 @@ app.use((err, req, res, next) => {
     });
   next();
 });
+
+app.use(errors());
 
 app.listen(PORT, () => {});
