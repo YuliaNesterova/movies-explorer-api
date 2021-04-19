@@ -31,12 +31,11 @@ app.use(helmet());
 app.use('*', cors(options));
 
 const { PORT = 3000 } = process.env;
-const { DATA_BASE, NODE_ENV } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect(NODE_ENV === 'production' ? DATA_BASE : 'mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
