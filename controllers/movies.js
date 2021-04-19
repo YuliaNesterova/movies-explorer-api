@@ -1,10 +1,13 @@
 const Movie = require('../models/movie');
 const BadRequestErr = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
-const ForbiddenErr = require("../errors/forbidden-err");
+const ForbiddenErr = require('../errors/forbidden-err');
+const { invalidDataErrorText, movieIdNotFoundErrorText, forbiddenErrorText } = require('../errors/error-texts');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
+  const owner = req.user._id;
+
+  Movie.find({ owner })
     .then((movies) => res.status(200).send(movies))
     .catch(next);
 };
@@ -30,25 +33,39 @@ module.exports.createMovie = (req, res, next) => {
     movieId,
     owner,
   })
-    .then((movie) => res.status(200).send(movie))
+    .then((movie) => res.status(200).send({
+      _id: movie._id,
+      country: movie.country,
+      director: movie.director,
+      duration: movie.duration,
+      year: movie.year,
+      description: movie.description,
+      image: movie.image,
+      trailer: movie.trailer,
+      nameRU: movie.nameRU,
+      nameEN: movie.nameEN,
+      thumbnail: movie.thumbnail,
+      movieId: movie.movieId,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestErr('Введены невалидные данные');
+        throw new BadRequestErr(invalidDataErrorText);
       }
+      return next(err);
     })
     .catch(next);
 };
 
 module.exports.deleteMovieById = (req, res, next) => {
-  Movie.findById(req.params.movieId)
+  Movie.findById(req.params.movieId).select('+owner')
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError('Нет фильма с таким id');
+        throw new NotFoundError(movieIdNotFoundErrorText);
       } else if (movie.owner.toString() !== req.user._id) {
-        throw new ForbiddenErr('Нет прав, нельзя удалять фильмы других пользователей');
+        throw new ForbiddenErr(forbiddenErrorText);
       }
 
-      Movie.findByIdAndDelete(req.params.movieId)
+      Movie.findByIdAndDelete(req.params.movieId).select('-owner')
         .then((deletedMovie) => res.status(200).send(deletedMovie));
     })
     .catch(next);

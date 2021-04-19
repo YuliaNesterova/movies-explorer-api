@@ -26,7 +26,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return /^(http|https):\/\/(www\.)?[\w-._~:/?#[\]@!$&'()*+,;=%]+#?$/i.test(v);
+        return /^(https?:\/\/)(www\.)?[\w-]+(\.[a-z])+[\w~!@#$%&*()-+=:;\\'",.?/]+#?/gi.test(v);
       },
     },
   },
@@ -35,7 +35,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return /^(http|https):\/\/(www\.)?[\w-._~:/?#[\]@!$&'()*+,;=%]+#?$/i.test(v);
+        return /^(https?:\/\/)(www\.)?[\w-]+(\.[a-z])+[\w~!@#$%&*()-+=:;\\'",.?/]+#?/gi.test(v);
       },
     },
   },
@@ -44,7 +44,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return /^(http|https):\/\/(www\.)?[\w-._~:/?#[\]@!$&'()*+,;=%]+#?$/i.test(v);
+        return /^(https?:\/\/)(www\.)?[\w-]+(\.[a-z])+[\w~!@#$%&*()-+=:;\\'",.?/]+#?/gi.test(v);
       },
     },
   },
@@ -52,9 +52,10 @@ const movieSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
     required: true,
+    select: false,
   },
   movieId: {
-    type: String,
+    type: Number,
     required: true,
   },
   nameRU: {

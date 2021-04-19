@@ -4,6 +4,10 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestErr = require('../errors/bad-request-err');
 const ConflictErr = require('../errors/conflict-err');
+const {
+  invalidDataErrorText, invalidUserIdErrorText, userIdNotFoundText,
+  duplicateEmailErrorText,
+} = require('../errors/error-texts');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -11,15 +15,16 @@ module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        throw new NotFoundError(userIdNotFoundText);
       } else {
         res.status(200).send(user);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestErr('Введен невалидный id пользователя');
+        throw new BadRequestErr(invalidUserIdErrorText);
       }
+      return next(err);
     })
     .catch(next);
 };
@@ -30,21 +35,24 @@ module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { email, name }, {
     new: true,
     runValidators: true,
-    upsert: true,
+    upsert: false,
   })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        throw new NotFoundError(userIdNotFoundText);
       } else {
         res.status(200).send(user);
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestErr('Введены невалидные данные');
+        throw new BadRequestErr(invalidDataErrorText);
       } else if (err.name === 'CastError') {
-        throw new BadRequestErr('Введен невалидный id пользователя');
+        throw new BadRequestErr(invalidUserIdErrorText);
+      } else if (err.codeName === 'DuplicateKey') {
+        throw new ConflictErr(duplicateEmailErrorText);
       }
+      return next(err);
     })
     .catch(next);
 };
@@ -57,7 +65,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new ConflictErr('Пользователь с таким email уже существует');
+        throw new ConflictErr(duplicateEmailErrorText);
       }
       return bcrypt.hash(password, 10);
     })
@@ -73,8 +81,9 @@ module.exports.createUser = (req, res, next) => {
       }))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          throw new BadRequestErr('Введены невалидные данные');
+          throw new BadRequestErr(invalidDataErrorText);
         }
+        return next(err);
       }))
     .catch(next);
 };
