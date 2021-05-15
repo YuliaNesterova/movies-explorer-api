@@ -16,6 +16,7 @@ const limiter = require('./middlewares/rate-limiter');
 const options = {
   origin: [
     'http://localhost:3001',
+    'https://movies-nesterova.students.nomoredomains.club/'
   ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: false,
